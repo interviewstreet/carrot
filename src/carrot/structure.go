@@ -18,7 +18,7 @@ type Body struct {
 	fileType		string
 	line			int
 	column			int
-	wordToComplete	string
+	wordToComplete		string
 	offset			int
 }
 
