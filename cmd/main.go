@@ -15,20 +15,20 @@ var httpPort = 8900
 var lines []string
 
 func readLines() ([]string) {
-  file, err := os.Open("input.txt")
-  if err != nil {
-    os.Exit(2)
-  }
-  defer file.Close()
+  	file, err := os.Open("input.txt")
+  	if err != nil {
+    		os.Exit(2)
+  	}
+  	defer file.Close()
 
-  scanner := bufio.NewScanner(file)
-  for scanner.Scan() {
-    lines = append(lines, scanner.Text())
-  }
-  if scanner.Err() != nil {
-  	os.Exit(1)
-  }
-  return lines
+  	scanner := bufio.NewScanner(file)
+  	for scanner.Scan() {
+    		lines = append(lines, scanner.Text())
+  	}
+  	if scanner.Err() != nil {
+  		os.Exit(1)
+  	}
+  	return lines
 }
 
 func main() {
