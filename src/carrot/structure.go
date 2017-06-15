@@ -2,6 +2,7 @@ package carrot
 
 import (
 	"time"
+	"fmt"
 )
 
 type Base struct {
@@ -13,21 +14,8 @@ type Base struct {
 	Path       string
 }
 
-type Body struct {
-	code			string
-	fileType		string
-	line			int
-	column			int
-	wordToComplete		string
-	offset			int
-}
-
-type Data struct {
-	body  Body
-}
-
 func GenMsg(line string) []byte {
-	return []byte(`&carrot.Data{&carrot.Body{line, "python", 0, 1, line, len([]rune(line))+1}}`)
+	return []byte(fmt.Sprintf("%s%s%s%d%s%s%s%d%s", `{"body":{"code":"`, line, `","fileType":"python","line":0,"column":`, len([]rune(line)),`,"wordToComplete":"`, line, `","offset":`, len([]rune(line))+1, `}}`))
 }
 
 type Routine struct {

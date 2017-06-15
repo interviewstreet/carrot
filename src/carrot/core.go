@@ -15,6 +15,7 @@ func receiveMsg(wsconn *websocket.Conn, done chan *Routine, rout *Routine) {
 		rout.ReceiveTime = time.Now()
 		rout.Diff = rout.ReceiveTime.Sub(rout.SendTime)
 		rout.ReceivedMsg = string(message)
+		fmt.Println(rout.ReceivedMsg)
 		if err != nil {
 			log.Println("read:", err)
 			return
@@ -35,7 +36,6 @@ func singleTest(counter *Counter, queue chan *Routine, base *Base, rout *Routine
 	if err != nil {
 		return
 	}
-	fmt.Println(line)
 	go writeMsg(conn, base, rout, counter, line)
 	go receiveMsg(conn, doneCh, rout)
 	queue <- <-doneCh
