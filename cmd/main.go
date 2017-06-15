@@ -7,6 +7,7 @@ import (
 	"time"
 	"os"
 	"bufio"
+	"sort"
 )
 
 var msg = []byte(`{"body":{"code":"i","fileType":"python","line":0,"column":1,"wordToComplete":"i","offset":2}}`)
@@ -44,6 +45,8 @@ func main() {
 	data := <-latency
 	timeData := <-timeSeries
 	fmt.Println(data, timeData)
+	sort.Float64s(data)
+	fmt.Println("99 percentile of the latency:", data[int(0.9*float64(len(data)))])
 	fmt.Println("Running HTTP Server, Check /latency route at Port", httpPort)
 	carrot.StartHTTPServer("8900", data, timeData)
 	fmt.Scanln()
