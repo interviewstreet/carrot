@@ -4,6 +4,7 @@ import (
 	"log"
 	"sync"
 	"time"
+	"fmt"
 
 	"github.com/gorilla/websocket"
 )
@@ -14,6 +15,7 @@ func receiveMsg(wsconn *websocket.Conn, done chan *Routine, rout *Routine) {
 		rout.ReceiveTime = time.Now()
 		rout.Diff = rout.ReceiveTime.Sub(rout.SendTime)
 		rout.ReceivedMsg = string(message)
+		fmt.Println(rout.ReceivedMsg)
 		if err != nil {
 			log.Println("read:", err)
 			return
@@ -22,24 +24,24 @@ func receiveMsg(wsconn *websocket.Conn, done chan *Routine, rout *Routine) {
 	}
 }
 
-func writeMsg(wsconn *websocket.Conn, base *Base, rout *Routine) {
+func writeMsg(wsconn *websocket.Conn, base *Base, rout *Routine, counter *Counter, line string) {
 	time.Sleep(time.Second * time.Duration(base.Delay))
 	rout.SendTime = time.Now()
-	wsconn.WriteMessage(websocket.TextMessage, base.Msg)
+	wsconn.WriteMessage(websocket.TextMessage, GenMsg(line))
 }
 
-func singleTest(counter *Counter, queue chan *Routine, base *Base, rout *Routine) {
+func singleTest(counter *Counter, queue chan *Routine, base *Base, rout *Routine, line string) {
 	doneCh := make(chan *Routine)
 	conn, err := CreateSocket(base.URL, base.Proto, base.Path, counter)
 	if err != nil {
 		return
 	}
-	go writeMsg(conn, base, rout)
+	go writeMsg(conn, base, rout, counter, line)
 	go receiveMsg(conn, doneCh, rout)
 	queue <- <-doneCh
 }
 
-func LoadTest(base *Base, latencyCh chan []float64, timeCh chan []time.Time) {
+func LoadTest(base *Base, latencyCh chan []float64, timeCh chan []time.Time, lines []string) {
 
 	queue := make(chan *Routine, 1)
 	globalCounter := &Counter{0, sync.Mutex{}, 0, 0}
@@ -50,7 +52,7 @@ func LoadTest(base *Base, latencyCh chan []float64, timeCh chan []time.Time) {
 
 	for range time.Tick(time.Millisecond * time.Duration(base.TickDelay)) {
 		routine := &Routine{time.Now(), time.Now(), 0, ""}
-		go singleTest(globalCounter, queue, base, routine)
+		go singleTest(globalCounter, queue, base, routine, lines[localCounter])
 		localCounter++
 		if localCounter == base.Count {
 			break

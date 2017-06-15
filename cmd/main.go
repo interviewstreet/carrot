@@ -5,23 +5,48 @@ import (
 	"fmt"
 	"runtime"
 	"time"
+	"os"
+	"bufio"
+	"sort"
 )
 
-var msg = []byte(`msg payload`)
+var msg = []byte(`{"body":{"code":"i","fileType":"python","line":0,"column":1,"wordToComplete":"i","offset":2}}`)
 var count = 1000
 var httpPort = 8900
+var lines []string
+
+func readLines() ([]string) {
+  	file, err := os.Open("input.txt")
+  	if err != nil {
+    		os.Exit(2)
+  	}
+  	defer file.Close()
+
+  	scanner := bufio.NewScanner(file)
+  	for scanner.Scan() {
+    		lines = append(lines, scanner.Text())
+  	}
+  	if scanner.Err() != nil {
+  		os.Exit(1)
+  	}
+  	return lines
+}
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	latency := make(chan []float64)
 	timeSeries := make(chan []time.Time)
 
-	currentTest := &carrot.Base{"example.com", "wss", 6000, msg, 100, 30, "/somepath"}
-	carrot.LoadTest(currentTest, latency, timeSeries)
+	lines := readLines()
+
+	currentTest := &carrot.Base{"localhost:8000", "ws", 100, msg, 10, 10, "/"}
+	carrot.LoadTest(currentTest, latency, timeSeries, lines)
 
 	data := <-latency
 	timeData := <-timeSeries
 	fmt.Println(data, timeData)
+	sort.Float64s(data)
+	fmt.Println("99 percentile of the latency:", data[int(0.9*float64(len(data)))])
 	fmt.Println("Running HTTP Server, Check /latency route at Port", httpPort)
 	carrot.StartHTTPServer("8900", data, timeData)
 	fmt.Scanln()
