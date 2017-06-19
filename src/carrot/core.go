@@ -4,7 +4,8 @@ import (
 	"log"
 	"sync"
 	"time"
-	"fmt"
+	"os"
+	"bufio"
 
 	"github.com/gorilla/websocket"
 )
@@ -15,7 +16,6 @@ func receiveMsg(wsconn *websocket.Conn, done chan *Routine, rout *Routine) {
 		rout.ReceiveTime = time.Now()
 		rout.Diff = rout.ReceiveTime.Sub(rout.SendTime)
 		rout.ReceivedMsg = string(message)
-		fmt.Println(rout.ReceivedMsg)
 		if err != nil {
 			log.Println("read:", err)
 			return
@@ -27,7 +27,26 @@ func receiveMsg(wsconn *websocket.Conn, done chan *Routine, rout *Routine) {
 func writeMsg(wsconn *websocket.Conn, base *Base, rout *Routine, counter *Counter, line string) {
 	time.Sleep(time.Second * time.Duration(base.Delay))
 	rout.SendTime = time.Now()
-	wsconn.WriteMessage(websocket.TextMessage, GenMsg(line))
+	wsconn.WriteMessage(websocket.TextMessage, base.Msg/*GenMsg(line)*/)
+}
+
+func ReadLines() ([]string) {
+	file, err := os.Open("input.txt")
+	if err != nil {
+		os.Exit(2)
+	}
+	defer file.Close()
+
+	var lines []string
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	if scanner.Err() != nil {
+		os.Exit(1)
+	}
+	return lines
 }
 
 func singleTest(counter *Counter, queue chan *Routine, base *Base, rout *Routine, line string) {
