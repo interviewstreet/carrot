@@ -1,6 +1,8 @@
 # Carrot
 Distributed WebSocket and HTTP Load Testing Framework in Go
 
+## Moved to New Open Source Organization: https://github.com/gophercarrot/carrot
+
 ### Highly Concurrent Load Testing Framework
 
 ## Setup
