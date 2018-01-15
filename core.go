@@ -9,17 +9,16 @@ import (
 )
 
 func receiveMsg(wsconn *websocket.Conn, done chan *Routine, rout *Routine) {
-	for {
-		_, message, err := wsconn.ReadMessage()
-		rout.ReceiveTime = time.Now()
-		rout.Diff = rout.ReceiveTime.Sub(rout.SendTime)
-		rout.ReceivedMsg = string(message)
-		if err != nil {
-			log.Println("read:", err)
-			return
-		}
-		done <- rout
+	_, message, err := wsconn.ReadMessage()
+	rout.ReceiveTime = time.Now()
+	rout.Diff = rout.ReceiveTime.Sub(rout.SendTime)
+	rout.ReceivedMsg = string(message)
+	if err != nil {
+		log.Println("read:", err)
+		return
 	}
+	done <- rout
+	defer wsconn.Close()
 }
 
 func writeMsg(wsconn *websocket.Conn, base *Base, rout *Routine) {
