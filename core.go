@@ -15,7 +15,7 @@ func getPayload () []string {
 		log.Println("file:", err)
 	}
 	stringPayload := string(bytePayload)
-	var payload = strings.Split(stringPayload, "\n")
+	payload := strings.Split(stringPayload, "\n")
 	return payload
 }
 
@@ -57,12 +57,11 @@ func LoadTest(base *Base, latencyCh chan []float64, timeCh chan []time.Time) {
 
 	var latency []float64
 	var timeSeries []time.Time
-	var index int = 0
+	var index int
 	var payloads = getPayload()
 
 	for range time.Tick(time.Millisecond * time.Duration(base.TickDelay)) {
-
-		var message = []byte(payloads[index])
+		message := []byte(payloads[index])
 		routine := &Routine{time.Now(), time.Now(), 0, ""}
 		go singleTest(globalCounter, queue, base, routine, message)
 
