@@ -7,7 +7,6 @@ import (
 type Base struct {
 	URL, Proto string
 	Count      int
-	Msg        []byte
 	Delay      int
 	TickDelay  int
 	Path       string

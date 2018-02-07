@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"runtime"
 	"time"
-
-	".."
+	"github.com/interviewstreet/carrot"
 )
 
-var msg = []byte(`msg payload`)
 var count = 1000
 var httpPort = 8900
 
@@ -38,7 +36,7 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	latency := make(chan []float64)
 	timeSeries := make(chan []time.Time)
-	currentTest := &carrot.Base{host, protocol, request, msg, writeTime, holdTime, path}
+	currentTest := &carrot.Base{host, protocol, request, writeTime, holdTime, path}
 	carrot.LoadTest(currentTest, latency, timeSeries)
 
 	data := <-latency

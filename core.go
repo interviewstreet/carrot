@@ -4,9 +4,20 @@ import (
 	"log"
 	"sync"
 	"time"
-
+	"io/ioutil"
+	"strings"
 	"github.com/gorilla/websocket"
 )
+
+func getPayload () []string {
+	bytePayload, err := ioutil.ReadFile("payloads.txt")
+    if err != nil {
+			log.Println("file:", err)
+    }
+	stringPayload := string(bytePayload)
+	var payload = strings.Split(stringPayload, "\n")
+	return payload
+}
 
 func receiveMsg(wsconn *websocket.Conn, done chan *Routine, rout *Routine) {
 	_, message, err := wsconn.ReadMessage()
@@ -21,19 +32,19 @@ func receiveMsg(wsconn *websocket.Conn, done chan *Routine, rout *Routine) {
 	defer wsconn.Close()
 }
 
-func writeMsg(wsconn *websocket.Conn, base *Base, rout *Routine) {
+func writeMsg(wsconn *websocket.Conn, base *Base, rout *Routine, msg []byte) {
 	time.Sleep(time.Second * time.Duration(base.Delay))
 	rout.SendTime = time.Now()
-	wsconn.WriteMessage(websocket.TextMessage, base.Msg)
+	wsconn.WriteMessage(websocket.TextMessage, msg)
 }
 
-func singleTest(counter *Counter, queue chan *Routine, base *Base, rout *Routine) {
+func singleTest(counter *Counter, queue chan *Routine, base *Base, rout *Routine, message []byte) {
 	doneCh := make(chan *Routine)
 	conn, err := CreateSocket(base.URL, base.Proto, base.Path, counter)
 	if err != nil {
 		return
 	}
-	go writeMsg(conn, base, rout)
+	go writeMsg(conn, base, rout, message)
 	go receiveMsg(conn, doneCh, rout)
 	queue <- <-doneCh
 }
@@ -46,14 +57,24 @@ func LoadTest(base *Base, latencyCh chan []float64, timeCh chan []time.Time) {
 
 	var latency []float64
 	var timeSeries []time.Time
+	var index int = 0
+	var payloads = getPayload()
 
 	for range time.Tick(time.Millisecond * time.Duration(base.TickDelay)) {
+		``
+		var message = []byte(payloads[index])
 		routine := &Routine{time.Now(), time.Now(), 0, ""}
-		go singleTest(globalCounter, queue, base, routine)
+		go singleTest(globalCounter, queue, base, routine, message)
+
+		index++
+		if index+1 > len(payloads) {
+			index = 0
+		}
 		localCounter++
 		if localCounter == base.Count {
 			break
 		}
+
 	}
 
 	go func() {
