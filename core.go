@@ -11,9 +11,9 @@ import (
 
 func getPayload () []string {
 	bytePayload, err := ioutil.ReadFile("payloads.txt")
-    if err != nil {
-			log.Println("file:", err)
-    }
+	if err != nil {
+		log.Println("file:", err)
+	}
 	stringPayload := string(bytePayload)
 	var payload = strings.Split(stringPayload, "\n")
 	return payload
@@ -61,7 +61,7 @@ func LoadTest(base *Base, latencyCh chan []float64, timeCh chan []time.Time) {
 	var payloads = getPayload()
 
 	for range time.Tick(time.Millisecond * time.Duration(base.TickDelay)) {
-		``
+
 		var message = []byte(payloads[index])
 		routine := &Routine{time.Now(), time.Now(), 0, ""}
 		go singleTest(globalCounter, queue, base, routine, message)
