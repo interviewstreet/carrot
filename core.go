@@ -1,21 +1,28 @@
 package carrot
 
 import (
+	"os"
 	"log"
 	"sync"
 	"time"
-	"io/ioutil"
-	"strings"
+	"bufio"
 	"github.com/gorilla/websocket"
 )
 
-func getPayload () []string {
-	bytePayload, err := ioutil.ReadFile("payloads.txt")
+func getPayload (payload_file string) []string {
+	var payload []string
+	inFile, err := os.Open(payload_file)
 	if err != nil {
-		log.Println("file:", err)
+		log.Println("file: ", err)
+		return payload
 	}
-	stringPayload := string(bytePayload)
-	payload := strings.Split(stringPayload, "\n")
+	defer inFile.Close()
+
+	scanner := bufio.NewScanner(inFile)
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		payload = append(payload, scanner.Text())
+	}
 	return payload
 }
 
@@ -49,7 +56,7 @@ func singleTest(counter *Counter, queue chan *Routine, base *Base, rout *Routine
 	queue <- <-doneCh
 }
 
-func LoadTest(base *Base, latencyCh chan []float64, timeCh chan []time.Time) {
+func LoadTest(base *Base, latencyCh chan []float64, timeCh chan []time.Time, payload_file string) {
 
 	queue := make(chan *Routine, 1)
 	globalCounter := &Counter{0, sync.Mutex{}, 0, 0}
@@ -58,7 +65,7 @@ func LoadTest(base *Base, latencyCh chan []float64, timeCh chan []time.Time) {
 	var latency []float64
 	var timeSeries []time.Time
 	var index int
-	var payloads = getPayload()
+	var payloads = getPayload(payload_file)
 
 	for range time.Tick(time.Millisecond * time.Duration(base.TickDelay)) {
 		message := []byte(payloads[index])

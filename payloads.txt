@@ -1,4 +1,0 @@
-{"body":{"code":"prin","fileType":"python","line":0,"column":4}}
-{"body":{"code":"whil","fileType":"python","line":0,"column":4}}
-{"body":{"code":"impo","fileType":"python","line":0,"column":4}}
-{"body":{"code":"lamb","fileType":"python","line":0,"column":4}}

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"runtime"
 	"time"
-	"github.com/interviewstreet/carrot"
+	".."
 )
 
 var count = 1000
@@ -31,13 +31,16 @@ func main() {
 	var path string
 	flag.StringVar(&path, "path", "/somepath", "Specific url path")
 
+	var payload_file string
+	flag.StringVar(&payload_file, "payload_file", "", "Path to the payload file")
+
 	flag.Parse()
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	latency := make(chan []float64)
 	timeSeries := make(chan []time.Time)
 	currentTest := &carrot.Base{host, protocol, request, writeTime, holdTime, path}
-	carrot.LoadTest(currentTest, latency, timeSeries)
+	carrot.LoadTest(currentTest, latency, timeSeries, payload_file)
 
 	data := <-latency
 	timeData := <-timeSeries
