@@ -6,6 +6,7 @@ import (
 	"time"
 	"io/ioutil"
 	"strings"
+	"fmt"
 	"github.com/gorilla/websocket"
 )
 
@@ -24,6 +25,7 @@ func receiveMsg(wsconn *websocket.Conn, done chan *Routine, rout *Routine) {
 	rout.ReceiveTime = time.Now()
 	rout.Diff = rout.ReceiveTime.Sub(rout.SendTime)
 	rout.ReceivedMsg = string(message)
+	fmt.Println(string(message))
 	if err != nil {
 		log.Println("read:", err)
 		return
